@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Hello World!</title>
+</head>
+
+<body>
+  <h3>Youtube Downloaded</h3>
+  <hr>
+  <button id="selectFolder">SelectFolder</button>
+  <p id="selectedFolder"></p>
+  <br>
+  <input type="text" id="inputurl" placeholder="Enter Video Url">
+  <button id="btnDownload">Download</button>
+
+  
+</body>
+<script>
+  var fs = require('fs');
+  var youtubedl = require('youtube-dl');
+  const {remote} = require('electron'),
+  dialog = remote.dialog,
+  WIN = remote.getCurrentWindow();
+  var downloadfolder =null;
+  document.querySelector('#btnDownload').addEventListener('click', () => {
+    var inputurl = document.querySelector('#inputurl').value;
+    DownloadVideo(inputurl)
+  })
+  function DownloadVideo(url) {
+    var video = youtubedl(url,
+      ['--format=18']);
+    video.on('info', function (info) {
+      console.log('download started: ' + info._filename);
+      video.pipe(fs.createWriteStream(downloadfolder+"\\"+info._filename+'.mp4'));
+    });
+    video.on('end', function () {
+      console.log('finished downloading: ');
+    });
+  }
+
+  document.querySelector('#selectFolder').addEventListener('click', () => {
+    dialog.showOpenDialog({properties:["openDirectory"]}, (dir) => {
+    downloadfolder = dir[0];
+    document.querySelector('#selectedFolder').innerHTML=dir[0];
+  })
+  })
+</script>
+
+</html>
